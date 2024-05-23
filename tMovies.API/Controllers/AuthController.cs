@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 using tMovies.API.Models;
 using tMovies.API.Token;
 using tMovies.API.Utilities;
@@ -28,19 +29,22 @@ namespace tMovies.API.Controllers
         {
             try
             {
-                var user = new User
+                if (DateTime.TryParseExact(registerUserViewModel.DateOfBirth, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateOfBirth))
                 {
-                    UserName = registerUserViewModel.UserName,
-                    Email = registerUserViewModel.Email                    
-                };
+                    var user = new User
+                    {
+                        UserName = registerUserViewModel.UserName,
+                        Email = registerUserViewModel.Email,
+                        DateOfBirth = dateOfBirth
+                    };
 
-                var result = await _userManager.CreateAsync(user, registerUserViewModel.Password);
+                    var result = await _userManager.CreateAsync(user, registerUserViewModel.Password);                    
+                }
 
                 return Ok(new ResultViewModel
                 {
                     Message = "Usuário criado com sucesso",
-                    Success = true,
-                    Data = user
+                    Success = true
                 });
             }
             catch (Exception)
